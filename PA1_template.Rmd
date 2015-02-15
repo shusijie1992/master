@@ -1,0 +1,58 @@
+# Loading and preprocessing the data
+
+## Read the CSV file, and verify that there are all together 17568 obs and 3 variables.
+
+```{r LoadandPreprocessData, echo=TRUE}
+act0 <-read.csv(file.path(getwd(), "activity.csv"), header=TRUE, sep=",")
+summary(act0)
+```
+
+Convert the ```date``` variable to a date class:
+```{r LoadandPreprocessData, echo=TRUE}
+library(ggplot2)
+library(plyr)
+
+act0$date <- as.Date(act0$date) 
+str(act0)
+'data.frame':  17568 obs. of  3 variables:
+ $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+ $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+# What is mean total number of steps taken per day?
+## 1.Calculate the total number of steps taken per day
+```{r, echo=TRUE}
+StepsDaily<-ddply(act0, c("date"),summarise,
+                   TotalSteps=sum(steps,na.rm=TRUE)
+                   )
+```
+
+## 2.If you do not understand the difference between a histogram and a barplot, research the difference between them. Make a histogram of the total number of steps taken each day
+
+```{r, echo=TRUE}
+ggplot(StepsDaily, aes(x = TotalSteps)) + geom_histogram(alpha = 1/2, binwidth = 1000)
+```
+
+
+# What is the average daily activity pattern?
+
+## 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+## 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r, echo=TRUE}
+StepsInterval<-ddply(act0, c("interval"),summarise, MeanSteps=sum(steps,na.rm=TRUE)
+
+ggplot(StepsInterval, aes(x = interval, y = MeanSteps)) + geom_line()
+```
+## The five minute interval with the highest mean step-count is interval #835 with a mean of 206.1698 steps.
+
+# Imputing missing values
+## There are 2304 incomplete records, unevenly distributed through the data.
+```{r, echo=TRUE}
+hist(which(complete.cases(activity)),
+     main="Count of complete cases (chronological order)",
+     xlab="Observation number",
+     ylab="Count of complete cases"
+     )
+```
